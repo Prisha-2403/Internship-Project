@@ -1,0 +1,3 @@
+# Single-page app: every route is served by index.html so a deep link or a
+# refresh on /transactions resolves in the router instead of 404-ing at the CDN.
+/*    /index.html   200

@@ -1,0 +1,39 @@
+# Netlify build configuration for the Sentinel Finance frontend.
+
+[build]
+  base    = "frontend"
+  command = "npm ci && npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# SPA fallback. Also declared in public/_redirects; kept here so the rule
+# survives if the publish directory is ever changed.
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options        = "DENY"
+    Referrer-Policy        = "no-referrer"
+    Permissions-Policy     = "geolocation=(), microphone=(), camera=(), payment=()"
+    # The app talks to exactly one API origin, set at build time via
+    # VITE_API_BASE_URL. connect-src is widened in the deploy notes if that
+    # origin changes.
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+
+# Hashed assets are immutable; the HTML entry point must never be cached.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"

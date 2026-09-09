@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Sentinel Finance — Project Report</title>
+<style>
+  /* ---------------------------------------------------------------
+     Print stylesheet. Rendered to PDF with headless Chrome at A4.
+     Colours match the application's own validated risk palette so the
+     document and the product read as one system.
+     --------------------------------------------------------------- */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 16mm 16mm;
+  }
+  @page :first { margin: 0; }
+
+  :root {
+    --ink:        #0f172a;
+    --ink-2:      #334155;
+    --ink-3:      #64748b;
+    --ink-4:      #94a3b8;
+    --line:       #e2e5ea;
+    --line-2:     #cbd2dc;
+    --surface:    #f8f9fb;
+    --brand:      #14243d;
+    --accent:     #1c5cab;
+    --accent-bg:  #eaf2fd;
+    --low:        #0f9d58;
+    --med:        #eda100;
+    --high:       #e8590c;
+    --crit:       #a51f1f;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", -apple-system, system-ui, sans-serif;
+    font-size: 9.6pt;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  table { font-variant-numeric: tabular-nums; }
+
+  /* --- Cover ---------------------------------------------------- */
+  .cover {
+    height: 297mm;
+    padding: 30mm 22mm 20mm;
+    background: var(--brand);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    page-break-after: always;
+  }
+  .cover .mark {
+    font-size: 11pt; font-weight: 600; letter-spacing: .34em;
+    color: #fff; margin-bottom: 2mm;
+  }
+  .cover .mark-sub {
+    font-size: 8.5pt; color: rgba(255,255,255,.55); letter-spacing: .04em;
+  }
+  .cover h1 {
+    font-size: 30pt; line-height: 1.16; font-weight: 600;
+    margin: 42mm 0 0; letter-spacing: -.01em; max-width: 150mm;
+  }
+  .cover .lede {
+    font-size: 11pt; line-height: 1.6; color: rgba(255,255,255,.72);
+    margin-top: 7mm; max-width: 140mm;
+  }
+  .cover .rule { height: 2px; background: rgba(255,255,255,.18); margin: 12mm 0 8mm; }
+  .cover-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 6mm;
+  }
+  .cover-grid .n { font-size: 19pt; font-weight: 600; }
+  .cover-grid .l {
+    font-size: 7.6pt; color: rgba(255,255,255,.5);
+    text-transform: uppercase; letter-spacing: .1em; margin-top: 1mm;
+  }
+  .cover .foot {
+    margin-top: auto; font-size: 8.6pt; color: rgba(255,255,255,.5);
+    border-top: 1px solid rgba(255,255,255,.14); padding-top: 5mm;
+  }
+  .cover .foot a { color: rgba(255,255,255,.78); text-decoration: none; }
+
+  /* --- Structure ------------------------------------------------ */
+  h2 {
+    font-size: 15pt; font-weight: 600; letter-spacing: -.01em;
+    margin: 0 0 1mm; padding-bottom: 2.5mm;
+    border-bottom: 2px solid var(--brand);
+    page-break-after: avoid;
+  }
+  h2 .num { color: var(--ink-4); font-weight: 500; margin-right: 3mm; }
+  h3 {
+    font-size: 10.6pt; font-weight: 600; margin: 6mm 0 2mm;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 9.4pt; font-weight: 600; margin: 4mm 0 1.5mm;
+    color: var(--ink-2); page-break-after: avoid;
+  }
+  section { page-break-before: always; }
+  section.cont { page-break-before: auto; }
+  p { margin: 0 0 2.6mm; }
+  .sub { color: var(--ink-3); font-size: 9pt; margin: 1.5mm 0 5mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin-bottom: 1.2mm; }
+  strong { font-weight: 600; }
+  code {
+    font-family: Consolas, "SF Mono", Menlo, monospace;
+    font-size: 8.4pt; background: var(--surface);
+    padding: .4mm 1.2mm; border-radius: 2px; color: var(--accent);
+  }
+
+  /* --- Tables --------------------------------------------------- */
+  table {
+    width: 100%; border-collapse: collapse;
+    margin: 2mm 0 4mm; font-size: 8.7pt;
+    page-break-inside: avoid;
+  }
+  thead { background: var(--brand); }
+  th {
+    text-align: left; padding: 2mm 2.4mm; font-weight: 600;
+    font-size: 7.6pt; letter-spacing: .07em; text-transform: uppercase;
+    color: #fff;
+  }
+  td { padding: 1.9mm 2.4mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tbody tr:nth-child(even) { background: #fafbfc; }
+  td.n, th.n { text-align: right; }
+  td.c, th.c { text-align: center; }
+  td code { background: transparent; padding: 0; }
+
+  /* --- Callouts ------------------------------------------------- */
+  .note {
+    border-left: 3px solid var(--accent); background: var(--accent-bg);
+    padding: 3mm 4mm; margin: 3mm 0 4mm; page-break-inside: avoid;
+  }
+  .note.warn { border-left-color: var(--med); background: #fdf6e3; }
+  .note.key  { border-left-color: var(--crit); background: #fbeeee; }
+  .note .t {
+    font-weight: 600; font-size: 8.8pt; margin-bottom: 1.2mm;
+    text-transform: uppercase; letter-spacing: .06em;
+  }
+  .note p:last-child { margin-bottom: 0; }
+
+  /* --- Stat strip ----------------------------------------------- */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 3mm 0 5mm; }
+  .stat { border: 1px solid var(--line); border-radius: 3px; padding: 3mm; page-break-inside: avoid; }
+  .stat .n { font-size: 15pt; font-weight: 600; line-height: 1; }
+  .stat .l {
+    font-size: 7.2pt; color: var(--ink-3); text-transform: uppercase;
+    letter-spacing: .08em; margin-top: 1.4mm;
+  }
+
+  /* --- Risk chips ----------------------------------------------- */
+  .chip {
+    display: inline-block; padding: .5mm 2mm; border-radius: 8px;
+    font-size: 7.6pt; font-weight: 600; white-space: nowrap;
+  }
+  .c-low  { background: #e7f6ee; color: #0b6b3d; }
+  .c-med  { background: #fdf3dd; color: #8a5e00; }
+  .c-high { background: #fdeee4; color: #a33c06; }
+  .c-crit { background: #f9e9e9; color: #8c1a1a; }
+  .c-na   { background: var(--surface); color: var(--ink-3); }
+
+  /* --- Layered architecture diagram ----------------------------- */
+  .layers { margin: 3mm 0 4mm; page-break-inside: avoid; }
+  .layer {
+    border: 1px solid var(--line-2); border-left: 3px solid var(--accent);
+    padding: 2.4mm 3mm; margin-bottom: 1.6mm; background: #fff;
+  }
+  .layer .h { font-weight: 600; font-size: 9pt; }
+  .layer .d { font-size: 8.3pt; color: var(--ink-3); }
+  .arrow { text-align: center; color: var(--ink-4); font-size: 8pt; margin: .4mm 0; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .kv { font-size: 8.7pt; }
+  .kv div { display: flex; justify-content: space-between; padding: 1.4mm 0; border-bottom: 1px solid var(--line); }
+  .kv span:first-child { color: var(--ink-3); }
+  .kv span:last-child { font-weight: 600; }
+
+  .formula {
+    background: var(--brand); color: #fff; padding: 3.5mm 4mm;
+    font-family: Consolas, monospace; font-size: 9.2pt;
+    text-align: center; margin: 3mm 0 4mm; border-radius: 3px;
+  }
+  .caption { font-size: 7.8pt; color: var(--ink-3); margin: -2mm 0 4mm; }
+</style>
+</head>
+<body>
+
+<!-- ======================= COVER ======================= -->
+<div class="cover">
+  <div>
+    <div class="mark">SENTINEL</div>
+    <div class="mark-sub">Financial Risk Intelligence Platform</div>
+  </div>
+
+  <h1>Fraud &amp; Anomaly<br>Detection Platform</h1>
+  <div class="lede">
+    An internal transaction monitoring and investigation system that scores every
+    transaction against the customer's own established behaviour, explains each
+    score in full, and carries the resulting investigation through to a recorded
+    outcome.
+  </div>
+
+  <div class="rule"></div>
+  <div class="cover-grid">
+    <div><div class="n">24,061</div><div class="l">Lines of code</div></div>
+    <div><div class="n">48</div><div class="l">API endpoints</div></div>
+    <div><div class="n">265</div><div class="l">Tests passing</div></div>
+    <div><div class="n">16</div><div class="l">Database tables</div></div>
+  </div>
+
+  <div class="foot">
+    Technical Project Report &nbsp;·&nbsp; 23 August 2026<br>
+    Live application &nbsp;<a>sentinel-finance-web.onrender.com</a><br>
+    Source &nbsp;<a>github.com/athex911911/sentinel-finance</a>
+  </div>
+</div>
+
+<!-- ======================= 1. OVERVIEW ======================= -->
+<section class="cont">
+<h2><span class="num">01</span>Overview</h2>
+<p class="sub">What the system is, and the principle it is built around.</p>
+
+<p>
+  Sentinel Finance is a decision-support platform for financial crime analysts. It
+  ingests transaction data, engineers behavioural features from each customer's own
+  history, scores every transaction for risk, and gives the analyst a complete,
+  itemised explanation of why a score is what it is. Flagged activity flows into a
+  case management workflow with evidence, notes and an immutable timeline.
+</p>
+
+<div class="note key">
+  <div class="t">The governing principle</div>
+  <p>
+    The system never asserts that fraud occurred. A risk score means a transaction
+    <strong>requires review</strong>. Every number shown to an analyst is traceable
+    to a named rule that actually fired, and the machine learning model's influence
+    is deliberately bounded so that a decision affecting a customer can always be
+    justified in plain language.
+  </p>
+</div>
+
+<h3>Design commitments</h3>
+<table>
+  <thead><tr><th style="width:34%">Commitment</th><th>How it is enforced in the build</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Explainability</strong></td><td>The displayed score is exactly the sum of the displayed factors. Enforced by an assertion in the scoring engine and by a randomised property test.</td></tr>
+    <tr><td><strong>Honesty about ML</strong></td><td>Precision, recall and confusion matrices are not shown, because no labelled fraud ground truth exists. The model page states this rather than fabricating figures.</td></tr>
+    <tr><td><strong>No lookahead</strong></td><td>Every feature is computed strictly from history preceding its transaction, so a backfilled score equals the score it would have received live. Verified by test.</td></tr>
+    <tr><td><strong>Auditability</strong></td><td>The audit trail is append-only at the database level, not by convention. <code>UPDATE</code> and <code>DELETE</code> are refused by PostgreSQL rules.</td></tr>
+    <tr><td><strong>Privacy</strong></td><td>Customer identifiers are masked in the serialisation layer, so no endpoint can leak them by omission.</td></tr>
+    <tr><td><strong>Synthetic data only</strong></td><td>All demonstration data is generated. No real person, account, device or payment is represented anywhere.</td></tr>
+  </tbody>
+</table>
+
+<h3>Live deployment</h3>
+<div class="kv">
+  <div><span>Application</span><span>sentinel-finance-web.onrender.com</span></div>
+  <div><span>API</span><span>sentinel-finance-api-u5e5.onrender.com</span></div>
+  <div><span>Source repository</span><span>github.com/athex911911/sentinel-finance</span></div>
+  <div><span>Transactions under monitoring</span><span>12,115</span></div>
+  <div><span>Customers profiled</span><span>90</span></div>
+  <div><span>Alerts raised</span><span>90</span></div>
+  <div><span>Investigation cases</span><span>28</span></div>
+</div>
+</section>
+
+<!-- ======================= 2. TECH STACK ======================= -->
+<section>
+<h2><span class="num">02</span>Technology Stack</h2>
+<p class="sub">Every dependency, with the reason it was chosen.</p>
+
+<h3>Backend — Python 3.11</h3>
+<table>
+  <thead><tr><th style="width:24%">Package</th><th class="c" style="width:13%">Version</th><th>Role and rationale</th></tr></thead>
+  <tbody>
+    <tr><td><strong>FastAPI</strong></td><td class="c">0.115.6</td><td>HTTP framework. Chosen for native Pydantic integration and automatic OpenAPI generation — the API documentation cannot drift from the code.</td></tr>
+    <tr><td><strong>Uvicorn</strong></td><td class="c">0.34.0</td><td>ASGI server running the application in production.</td></tr>
+    <tr><td><strong>Pydantic</strong></td><td class="c">2.10.5</td><td>Request validation and response serialisation. PII masking is implemented here so it cannot be bypassed.</td></tr>
+    <tr><td><strong>pydantic-settings</strong></td><td class="c">2.7.1</td><td>Typed configuration from environment variables; no secret is ever hardcoded.</td></tr>
+    <tr><td><strong>SQLAlchemy</strong></td><td class="c">2.0.36</td><td>ORM and query builder. Parameterised throughout, which structurally prevents SQL injection.</td></tr>
+    <tr><td><strong>Alembic</strong></td><td class="c">1.14.0</td><td>Schema migrations, including the raw SQL that installs the append-only audit rules.</td></tr>
+    <tr><td><strong>psycopg</strong></td><td class="c">3.2.3</td><td>PostgreSQL driver (version 3, binary distribution).</td></tr>
+    <tr><td><strong>scikit-learn</strong></td><td class="c">1.6.1</td><td>Isolation Forest implementation and the StandardScaler feeding it.</td></tr>
+    <tr><td><strong>pandas</strong></td><td class="c">2.2.3</td><td>Vectorised feature engineering across customer-partitioned, time-sorted data.</td></tr>
+    <tr><td><strong>NumPy</strong></td><td class="c">2.2.1</td><td>Numerical operations, including exact time-window counts via <code>searchsorted</code>.</td></tr>
+    <tr><td><strong>joblib</strong></td><td class="c">1.4.2</td><td>Serialises the fitted scaler and model together as one artifact.</td></tr>
+    <tr><td><strong>PyJWT</strong></td><td class="c">2.10.1</td><td>Token issuing and verification (HS256).</td></tr>
+    <tr><td><strong>bcrypt</strong></td><td class="c">4.2.1</td><td>Password hashing at cost 12. Used directly rather than through passlib, which mis-detects bcrypt 4.x.</td></tr>
+    <tr><td><strong>openpyxl</strong></td><td class="c">3.1.5</td><td>Excel export generation.</td></tr>
+    <tr><td><strong>pytest / httpx</strong></td><td class="c">8.3.4 / 0.28.1</td><td>Test framework and the client used to exercise the API in tests.</td></tr>
+  </tbody>
+</table>
+
+<h3>Frontend — TypeScript</h3>
+<table>
+  <thead><tr><th style="width:24%">Package</th><th class="c" style="width:13%">Version</th><th>Role and rationale</th></tr></thead>
+  <tbody>
+    <tr><td><strong>React</strong></td><td class="c">19.2</td><td>UI library. Default output escaping gives XSS safety without extra work.</td></tr>
+    <tr><td><strong>TypeScript</strong></td><td class="c">6.0</td><td>Static typing. API response shapes are typed to mirror the backend schemas.</td></tr>
+    <tr><td><strong>Vite</strong></td><td class="c">8.2</td><td>Build tool and dev server. Produces the hashed, code-split production bundle.</td></tr>
+    <tr><td><strong>TanStack Query</strong></td><td class="c">5.101</td><td>Server-state management: caching, background refetch, and the interval polling behind the alert centre.</td></tr>
+    <tr><td><strong>React Router</strong></td><td class="c">7.18</td><td>Client-side routing across sixteen routes, with lazy-loaded page bundles.</td></tr>
+    <tr><td><strong>Tailwind CSS</strong></td><td class="c">4.3</td><td>Styling via a single design-token layer, so risk colours are identical everywhere.</td></tr>
+    <tr><td><strong>Recharts</strong></td><td class="c">3.10</td><td>Charting, wrapped in project components that enforce one consistent set of chart decisions.</td></tr>
+    <tr><td><strong>Lucide React</strong></td><td class="c">1.33</td><td>Icon set. Icons pair with risk colours so meaning never rests on colour alone.</td></tr>
+    <tr><td><strong>date-fns / clsx / tailwind-merge</strong></td><td class="c">—</td><td>Date handling and conditional class composition.</td></tr>
+  </tbody>
+</table>
+
+<h3>Data and infrastructure</h3>
+<table>
+  <thead><tr><th style="width:24%">Component</th><th style="width:20%">Technology</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Database</strong></td><td>PostgreSQL 17</td><td>Hosted on Supabase. Chosen for native enum types, JSONB, and the rule system that makes the audit trail immutable.</td></tr>
+    <tr><td><strong>API hosting</strong></td><td>Render</td><td>Free Python web service, deployed from GitHub via a <code>render.yaml</code> Blueprint.</td></tr>
+    <tr><td><strong>Frontend hosting</strong></td><td>Render Static</td><td>CDN-served static bundle with an SPA rewrite rule.</td></tr>
+    <tr><td><strong>Version control</strong></td><td>Git / GitHub</td><td>Public repository; secrets excluded and verified absent from the entire history.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ======================= 3. ARCHITECTURE ======================= -->
+<section>
+<h2><span class="num">03</span>System Architecture</h2>
+<p class="sub">Strict layering, with each layer talking only to the one beneath it.</p>
+
+<div class="layers">
+  <div class="layer"><div class="h">api/ — HTTP boundary</div><div class="d">Parses requests, authorises, delegates, serialises. Contains no business logic. 14 route modules.</div></div>
+  <div class="arrow">▼</div>
+  <div class="layer"><div class="h">services/ — business logic</div><div class="d">Risk scoring, case lifecycle, analytics, customer profiling, import, export, alerts, audit, masking.</div></div>
+  <div class="arrow">▼</div>
+  <div class="layer"><div class="h">repositories/ — querying</div><div class="d">All filtering, sorting and pagination expressed in SQL, so the monitoring table scales with the dataset.</div></div>
+  <div class="arrow">▼</div>
+  <div class="layer"><div class="h">db/models/ — persistence</div><div class="d">SQLAlchemy ORM across 16 tables with foreign keys, indexes and check constraints.</div></div>
+</div>
+
+<div class="note">
+  <div class="t">Why the scoring engine is isolated</div>
+  <p>
+    <code>risk_scoring_service.py</code> has no knowledge of HTTP or the database. It
+    takes a feature snapshot and returns an assessment. That makes it directly unit
+    testable, and guarantees a transaction is scored identically whether the call
+    arrives through the API, a CSV import, or a batch backfill.
+  </p>
+</div>
+
+<h3>Separation of the three transaction tables</h3>
+<table>
+  <thead><tr><th style="width:26%">Table</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>transactions</code></td><td>The immutable financial record exactly as ingested. Never rewritten by detection.</td></tr>
+    <tr><td><code>transaction_features</code></td><td>Engineered behavioural signals. Fully recomputable from the source record.</td></tr>
+    <tr><td><code>risk_scores</code></td><td>The scoring verdict, versioned against the model that produced it. Also recomputable.</td></tr>
+  </tbody>
+</table>
+<p class="caption">
+  Keeping these apart means re-running detection rewrites features and scores without
+  ever touching the underlying financial record — an audit requirement, not a
+  convenience.
+</p>
+
+<h3>Frontend structure</h3>
+<table>
+  <thead><tr><th style="width:26%">Directory</th><th>Contents</th></tr></thead>
+  <tbody>
+    <tr><td><code>lib/</code></td><td>Typed API client with automatic token refresh, formatters, and the single risk-presentation source of truth.</td></tr>
+    <tr><td><code>components/ui/</code></td><td>Primitives: buttons, inputs, tables, dialogs, skeletons, tooltips, pagination, empty and error states.</td></tr>
+    <tr><td><code>components/risk/</code></td><td>Risk badge, score gauge, factor breakdown, demo-data banner, decision-support notice.</td></tr>
+    <tr><td><code>charts/</code></td><td>Recharts wrappers carrying one shared set of chart rules — thin marks, recessive grids, hover layer by default.</td></tr>
+    <tr><td><code>pages/</code></td><td>Sixteen route components, each lazily loaded to keep the initial bundle small.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ======================= 4. DATABASE ======================= -->
+<section>
+<h2><span class="num">04</span>Database Design</h2>
+<p class="sub">16 tables · 63 indexes · 25 foreign keys · 11 native enum types.</p>
+
+<table>
+  <thead><tr><th style="width:22%">Table</th><th>Purpose</th><th class="c" style="width:11%">Key trait</th></tr></thead>
+  <tbody>
+    <tr><td><code>roles</code></td><td>The four access tiers, with privilege ordering stored as an integer level.</td><td class="c">Seeded</td></tr>
+    <tr><td><code>users</code></td><td>Platform operators. Stores a bcrypt digest only.</td><td class="c">Unique email</td></tr>
+    <tr><td><code>customers</code></td><td>Account holders under monitoring, with home location and behavioural segment.</td><td class="c">Masked out</td></tr>
+    <tr><td><code>devices</code></td><td>Devices seen on an account; <code>first_seen_at</code> drives the new-device rule.</td><td class="c">Per customer</td></tr>
+    <tr><td><code>beneficiaries</code></td><td>Payees an account has transacted with.</td><td class="c">Per customer</td></tr>
+    <tr><td><code>transactions</code></td><td>The financial record. 11 indexes including a composite on customer and time.</td><td class="c">Immutable</td></tr>
+    <tr><td><code>transaction_features</code></td><td>24 engineered feature columns, one row per transaction.</td><td class="c">Recomputable</td></tr>
+    <tr><td><code>risk_scores</code></td><td>Business score, band, ML score, and the factor breakdown as JSONB.</td><td class="c">Versioned</td></tr>
+    <tr><td><code>alerts</code></td><td>Raised when a score crosses the alert threshold. One per transaction.</td><td class="c">Deduplicated</td></tr>
+    <tr><td><code>cases</code></td><td>Investigations, with status, priority, assignment and peak linked risk.</td><td class="c">Workflow</td></tr>
+    <tr><td><code>case_transactions</code></td><td>Evidence links between cases and transactions.</td><td class="c">Join</td></tr>
+    <tr><td><code>case_notes</code></td><td>Analyst notes with optional external evidence references.</td><td class="c">Authored</td></tr>
+    <tr><td><code>case_events</code></td><td>The investigation timeline. Every mutation writes one row.</td><td class="c">Append-only</td></tr>
+    <tr><td><code>audit_logs</code></td><td>Security-relevant actions with actor, IP, and before/after state.</td><td class="c">Immutable</td></tr>
+    <tr><td><code>model_versions</code></td><td>Training provenance: date, record count, features, threshold, parameters.</td><td class="c">One active</td></tr>
+    <tr><td><code>import_jobs</code></td><td>CSV upload outcomes with per-row error reports.</td><td class="c">Tallied</td></tr>
+  </tbody>
+</table>
+
+<div class="note key">
+  <div class="t">Audit immutability — enforced, not promised</div>
+  <p>
+    Migration <code>0001</code> installs two PostgreSQL rules that rewrite
+    <code>UPDATE</code> and <code>DELETE</code> on <code>audit_logs</code> into no-ops.
+    This was verified against the live database: an <code>UPDATE</code>, a targeted
+    <code>DELETE</code>, and a bare <code>DELETE FROM audit_logs</code> executed as the
+    table owner were all silently discarded, with the row count unchanged. Neither an
+    application bug nor a compromised application role can rewrite history.
+  </p>
+</div>
+
+<h3>Least-privilege database role</h3>
+<p>
+  The application connects as a dedicated <code>sentinel</code> role created with
+  <code>NOSUPERUSER</code>, <code>NOCREATEDB</code> and <code>NOCREATEROLE</code>. The
+  bootstrap script requires the superuser password exactly once, to create that role and
+  the database, and never stores it. This was confirmed correct when the test suite —
+  which had tried to create its own test database — was properly refused by PostgreSQL.
+</p>
+</section>
+
+<!-- ======================= 5. RISK SCORING ======================= -->
+<section>
+<h2><span class="num">05</span>Risk Scoring Engine</h2>
+<p class="sub">Eight deterministic business rules plus one bounded machine learning factor.</p>
+
+<p>
+  Each rule fires only when its condition is met, and contributes a named, positive
+  number of points. The analyst sees every rule that fired, its point value, and a
+  plain-language explanation of the evidence.
+</p>
+
+<table>
+  <thead><tr><th style="width:23%">Rule</th><th>Condition</th><th class="n" style="width:9%">Max</th></tr></thead>
+  <tbody>
+    <tr><td><code>AMOUNT_DEVIATION</code></td><td>Amount z-score against the customer's 90-day baseline, <em>or</em> plain multiple of their average — whichever is the stronger signal</td><td class="n">28</td></tr>
+    <tr><td><code>NEW_DEVICE</code></td><td>Device never seen on this account (12 points if seen only once or twice)</td><td class="n">20</td></tr>
+    <tr><td><code>NEW_LOCATION</code></td><td>City the customer has never transacted from, +5 beyond 500 km from their usual area</td><td class="n">20</td></tr>
+    <tr><td><code>NEW_BENEFICIARY</code></td><td>First ever payment to this payee from this account</td><td class="n">15</td></tr>
+    <tr><td><code>BEHAVIOR_CHANGE</code></td><td>Sustained drift in spend size and pace versus the established baseline</td><td class="n">15</td></tr>
+    <tr><td><code>HIGH_FREQUENCY</code></td><td>≥3 transactions in 10 minutes, ≥6 within an hour, or ≥3× the daily norm</td><td class="n">14</td></tr>
+    <tr><td><code>UNUSUAL_TIME</code></td><td>Hour holding under 5% of the customer's prior activity (needs ≥20 prior transactions)</td><td class="n">12</td></tr>
+    <tr><td><code>AMOUNT_ABSOLUTE</code></td><td>Beyond the customer's own historical 99th percentile</td><td class="n">10</td></tr>
+    <tr><td><code>ML_ANOMALY</code></td><td>Bounded uplift from the Isolation Forest, above its own decision boundary</td><td class="n">15</td></tr>
+  </tbody>
+</table>
+
+<h3>Risk bands</h3>
+<table>
+  <thead><tr><th class="c" style="width:16%">Band</th><th class="c" style="width:14%">Score</th><th>Analyst guidance</th></tr></thead>
+  <tbody>
+    <tr><td class="c"><span class="chip c-low">LOW</span></td><td class="c">0 – 29</td><td>Consistent with established behaviour. No review required.</td></tr>
+    <tr><td class="c"><span class="chip c-med">MEDIUM</span></td><td class="c">30 – 59</td><td>Some deviation from normal. Worth a look when capacity allows.</td></tr>
+    <tr><td class="c"><span class="chip c-high">HIGH</span></td><td class="c">60 – 79</td><td>Several behavioural signals triggered. Requires analyst review.</td></tr>
+    <tr><td class="c"><span class="chip c-crit">CRITICAL</span></td><td class="c">80 – 100</td><td>Strong combination of signals. Prioritise for investigation.</td></tr>
+  </tbody>
+</table>
+
+<h3>The invariant the design protects</h3>
+<div class="formula">business_score  ==  Σ (points of the factors shown to the analyst)</div>
+
+<p>
+  Raw signal strength can exceed 100 when many rules fire together. Rather than clipping
+  — which would leave the displayed factors summing to more than the displayed score —
+  contributions are scaled proportionally onto the 0–100 scale using largest-remainder
+  rounding, and the assessment records that scaling occurred. The explanation panel never
+  shows numbers that fail to add up. This is asserted in the engine itself and verified by
+  a randomised property test across thousands of generated feature combinations.
+</p>
+
+<h3>A worked example from the live system</h3>
+<table>
+  <thead><tr><th>Factor</th><th class="n" style="width:12%">Points</th><th style="width:44%">Evidence shown to the analyst</th></tr></thead>
+  <tbody>
+    <tr><td>Unusual Amount</td><td class="n">23</td><td>32.4× this customer's average of ₹8,735</td></tr>
+    <tr><td>New Device</td><td class="n">17</td><td>Device not previously seen on this account</td></tr>
+    <tr><td>New Location</td><td class="n">17</td><td>842 km from the customer's usual area, never used before</td></tr>
+    <tr><td>New Beneficiary</td><td class="n">13</td><td>First transfer to this payee</td></tr>
+    <tr><td>ML Anomaly Signal</td><td class="n">12</td><td>Isolation Forest anomaly score 1.00</td></tr>
+    <tr><td>Unusual Time</td><td class="n">10</td><td>Occurred at 04:00, outside normal hours</td></tr>
+    <tr><td>High Value Transaction</td><td class="n">8</td><td>Exceeds the customer's own 99th percentile</td></tr>
+    <tr style="background:#f1f5f9"><td><strong>Total</strong></td><td class="n"><strong>100</strong></td><td><strong>CRITICAL</strong> — matches the displayed score exactly</td></tr>
+  </tbody>
+</table>
+
+<div class="note warn">
+  <div class="t">Why the amount rule takes the stronger of two measures</div>
+  <p>
+    A customer with near-constant spending has a standard deviation of zero, making the
+    z-score undefined. Under a z-score-only rule, a 50× transaction on such an account
+    would score nothing — precisely the case most worth catching. The rule therefore also
+    evaluates a plain multiple of the customer's average and takes whichever signal is
+    stronger.
+  </p>
+</div>
+</section>
+
+<!-- ======================= 6. FEATURES ======================= -->
+<section>
+<h2><span class="num">06</span>Feature Engineering</h2>
+<p class="sub">24 documented features per transaction; 14 of them feed the model.</p>
+
+<div class="note key">
+  <div class="t">No lookahead</div>
+  <p>
+    Every feature is computed strictly from the customer's history <em>preceding</em> the
+    transaction being described. A score computed during a backfill is therefore identical
+    to the score that transaction would have received live. The test suite asserts this
+    directly: it recomputes features with later rows removed and requires every value to be
+    unchanged.
+  </p>
+</div>
+
+<table>
+  <thead><tr><th style="width:29%">Feature</th><th>Definition</th><th class="c" style="width:11%">Model</th></tr></thead>
+  <tbody>
+    <tr><td><code>amount_zscore</code></td><td>Standard deviations above the customer's prior mean; zero when history is too thin</td><td class="c">Yes</td></tr>
+    <tr><td><code>amount_vs_customer_avg_ratio</code></td><td>This amount divided by the customer's prior average</td><td class="c">Yes</td></tr>
+    <tr><td><code>customer_avg_amount</code></td><td>Expanding mean of prior amounts, excluding this transaction</td><td class="c">—</td></tr>
+    <tr><td><code>customer_std_amount</code></td><td>Expanding standard deviation of prior amounts</td><td class="c">—</td></tr>
+    <tr><td><code>customer_p99_amount</code></td><td>Prior 99th-percentile amount for this customer</td><td class="c">—</td></tr>
+    <tr><td><code>amount_value</code></td><td>The raw transaction amount</td><td class="c">—</td></tr>
+    <tr><td><code>txn_count_10m</code></td><td>Transactions in the 10 minutes up to and including this one</td><td class="c">Yes</td></tr>
+    <tr><td><code>txn_count_1h</code></td><td>Transactions within the preceding hour</td><td class="c">Yes</td></tr>
+    <tr><td><code>txn_count_24h</code></td><td>Transactions within the preceding 24 hours</td><td class="c">Yes</td></tr>
+    <tr><td><code>customer_avg_daily_txns</code></td><td>Historical transactions per day, from prior activity only</td><td class="c">—</td></tr>
+    <tr><td><code>velocity_score</code></td><td>Short-window rate relative to the customer's own norm</td><td class="c">Yes</td></tr>
+    <tr><td><code>hour_of_day</code></td><td>Local hour, 0–23</td><td class="c">Yes</td></tr>
+    <tr><td><code>day_of_week</code></td><td>Monday through Sunday as 0–6</td><td class="c">Yes</td></tr>
+    <tr><td><code>is_unusual_hour</code></td><td>Hour holds under 5% of prior activity, with ≥20 prior transactions</td><td class="c">—</td></tr>
+    <tr><td><code>is_new_device</code></td><td>Device unseen for this customer</td><td class="c">—</td></tr>
+    <tr><td><code>is_new_location</code></td><td>City not in the customer's historical set</td><td class="c">—</td></tr>
+    <tr><td><code>is_new_beneficiary</code></td><td>Payee never paid before</td><td class="c">—</td></tr>
+    <tr><td><code>device_usage_count</code></td><td>Prior uses of this device by this customer</td><td class="c">—</td></tr>
+    <tr><td><code>distance_from_usual_km</code></td><td>Haversine distance from the centroid of prior transaction locations</td><td class="c">Yes</td></tr>
+    <tr><td><code>unique_devices_30d</code></td><td>Distinct devices used in the preceding 30 days</td><td class="c">Yes</td></tr>
+    <tr><td><code>unique_locations_30d</code></td><td>Distinct cities transacted from in the preceding 30 days</td><td class="c">Yes</td></tr>
+    <tr><td><code>amount_trend_ratio</code></td><td>7-day average amount over the longer-run average</td><td class="c">Yes</td></tr>
+    <tr><td><code>frequency_trend_ratio</code></td><td>7-day transaction rate over the longer-run rate</td><td class="c">Yes</td></tr>
+    <tr><td><code>behavior_change_score</code></td><td>Combined upward drift in spend and pace, 0 to 1</td><td class="c">Yes</td></tr>
+  </tbody>
+</table>
+
+<h3>Computation strategy</h3>
+<p>
+  Features are produced in two passes. A vectorised pandas pass handles statistics that
+  expanding and rolling windows express directly. A single ordered pass per customer handles
+  the stateful signals — novelty, 30-day distinct counts, the hour-of-day distribution and the
+  location centroid — each of which requires memory of everything seen so far. Time-window
+  counts use NumPy <code>searchsorted</code> on pre-sorted timestamps, which is exact and
+  behaves identically whether the frame holds one customer or ten thousand.
+</p>
+
+<div class="note">
+  <div class="t">What the model is deliberately not shown</div>
+  <p>
+    Raw amounts, customer identifiers, and the boolean novelty flags are withheld from the
+    model. It learns from behavioural shape; the novelty conditions are already covered
+    explicitly and transparently by the business rules, where an analyst can see them.
+  </p>
+</div>
+</section>
+
+<!-- ======================= 7. ML PIPELINE ======================= -->
+<section>
+<h2><span class="num">07</span>Machine Learning Pipeline</h2>
+<p class="sub">Isolation Forest, kept as a separate and bounded signal.</p>
+
+<div class="formula" style="font-size:8.4pt">load → clean → engineer features → scale → fit → score → normalise → combine with rules → persist</div>
+
+<h3>Live model</h3>
+<div class="stats">
+  <div class="stat"><div class="n">12,115</div><div class="l">Training records</div></div>
+  <div class="stat"><div class="n">14</div><div class="l">Input features</div></div>
+  <div class="stat"><div class="n">200</div><div class="l">Estimators</div></div>
+  <div class="stat"><div class="n">0.03</div><div class="l">Contamination</div></div>
+</div>
+
+<h3>Score normalisation</h3>
+<p>
+  scikit-learn's <code>decision_function</code> is unbounded and centred on zero, which is
+  impossible to compare across training runs. Output is mapped onto a 0–1 scale using
+  percentile bounds captured at fit time and stored on the model version row. Reusing the
+  training bounds is the point: a transaction scored next week lands on the same scale as one
+  scored during training, so stored scores stay comparable and the threshold does not silently
+  move.
+</p>
+<p>
+  The anomaly threshold is the normalised position of the model's own decision boundary, so
+  "the model considers this anomalous" and "the score is at or above the threshold" are the
+  same statement. On the live model that threshold is <strong>0.7297</strong>, with an
+  observed anomaly rate of <strong>3%</strong>.
+</p>
+
+<h3>How the model combines with the rules</h3>
+<p>
+  The model contributes only above its own threshold, and its contribution is capped at 15
+  points. It appears in the explanation panel as one named factor alongside the business
+  rules, with its own point value — so the final score remains fully attributable while still
+  incorporating a signal the rules alone would miss.
+</p>
+
+<div class="note">
+  <div class="t">Graceful degradation</div>
+  <p>
+    If no model has been trained, or its artifact cannot be loaded, the platform continues to
+    operate. The business rules alone produce a complete and fully explainable score; the ML
+    factor simply does not fire. The system never blocks on the model being available.
+  </p>
+</div>
+
+<h3>Detection performance on the live dataset</h3>
+<table>
+  <thead><tr><th>Risk band</th><th class="n" style="width:16%">Transactions</th><th class="n" style="width:14%">Share</th></tr></thead>
+  <tbody>
+    <tr><td><span class="chip c-low">LOW</span></td><td class="n">11,892</td><td class="n">98.16%</td></tr>
+    <tr><td><span class="chip c-med">MEDIUM</span></td><td class="n">133</td><td class="n">1.10%</td></tr>
+    <tr><td><span class="chip c-high">HIGH</span></td><td class="n">58</td><td class="n">0.48%</td></tr>
+    <tr><td><span class="chip c-crit">CRITICAL</span></td><td class="n">32</td><td class="n">0.26%</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ======================= 8. MODEL METRICS ======================= -->
+<section>
+<h2><span class="num">08</span>On Model Metrics</h2>
+<p class="sub">What the system reports, and what it deliberately refuses to report.</p>
+
+<div class="note key">
+  <div class="t">Stated verbatim on the model performance page</div>
+  <p style="font-size:11pt;font-weight:600;margin-top:2mm">
+    "Model performance metrics requiring labeled ground truth are unavailable."
+  </p>
+</div>
+
+<p>
+  Precision, recall, F1 and confusion matrices require confirmed outcomes for each
+  transaction — a verified record of which were genuinely fraudulent. This platform has no
+  such labels. Any figure presented would therefore be fabricated, so the model page omits
+  them entirely and explains why, rather than producing a number that looks rigorous and is
+  not.
+</p>
+
+<h3>What is reported instead</h3>
+<table>
+  <thead><tr><th style="width:34%">Reported</th><th>Because</th></tr></thead>
+  <tbody>
+    <tr><td>Model version, algorithm, training date</td><td>Provenance facts read from the registry</td></tr>
+    <tr><td>Training record count and feature list</td><td>Directly observed at fit time</td></tr>
+    <tr><td>Contamination, estimators, threshold</td><td>Configuration the model was fitted with</td></tr>
+    <tr><td>Observed anomaly rate</td><td>Measured proportion the fitted model marked anomalous</td></tr>
+    <tr><td>Analyst case outcomes</td><td>Real human decisions, shown on the analytics page</td></tr>
+  </tbody>
+</table>
+
+<h3>Analyst outcomes — the honest measure</h3>
+<p>
+  The analytics page reports what analysts actually concluded. Alerts that nobody has judged
+  yet are counted as <strong>pending</strong>, not folded into either bucket, because treating
+  an unreviewed alert as a confirmation or a false positive would misrepresent the work done.
+</p>
+<div class="kv">
+  <div><span>Alerts raised</span><span>90</span></div>
+  <div><span>Cases opened</span><span>28</span></div>
+  <div><span>Reached a terminal decision</span><span>12</span></div>
+  <div><span>Confirmed suspicious</span><span>3</span></div>
+  <div><span>False positive</span><span>6</span></div>
+  <div><span>Closed, no action</span><span>3</span></div>
+  <div><span>Still open</span><span>16</span></div>
+  <div><span>Pending review (no case yet)</span><span>62</span></div>
+</div>
+
+<h3>Synthetic scenario coverage</h3>
+<p>
+  Because the data generator records which transactions it injected, coverage against those
+  scenarios can be measured. This is reported in a separately labelled panel marked
+  <strong>DEMO DATA ONLY — not a fraud-accuracy metric</strong>. It describes generated data
+  and says nothing about accuracy against real fraud.
+</p>
+<table>
+  <thead><tr><th>Injected scenario</th><th class="n" style="width:15%">Generated</th><th class="n" style="width:17%">Reached review</th><th class="n" style="width:17%">Reached high risk</th></tr></thead>
+  <tbody>
+    <tr><td>Multiple anomalies combined</td><td class="n">11</td><td class="n">11 (100%)</td><td class="n">11 (100%)</td></tr>
+    <tr><td>Large transaction spike</td><td class="n">14</td><td class="n">14 (100%)</td><td class="n">11 (79%)</td></tr>
+    <tr><td>New device</td><td class="n">14</td><td class="n">14 (100%)</td><td class="n">11 (79%)</td></tr>
+    <tr><td>Unusual location</td><td class="n">17</td><td class="n">16 (94%)</td><td class="n">7 (41%)</td></tr>
+    <tr><td>Unusual transaction time</td><td class="n">10</td><td class="n">9 (90%)</td><td class="n">6 (60%)</td></tr>
+    <tr><td>Transaction velocity spike</td><td class="n">93</td><td class="n">72 (77%)</td><td class="n">44 (47%)</td></tr>
+  </tbody>
+</table>
+<p class="caption">
+  Velocity coverage is lower by design: the first transaction in a burst is not yet a burst,
+  and correctly scores low at the moment it occurs.
+</p>
+</section>
+
+<!-- ======================= 9. SECURITY ======================= -->
+<section>
+<h2><span class="num">09</span>Security</h2>
+<p class="sub">Controls implemented, and the reasoning behind each.</p>
+
+<table>
+  <thead><tr><th style="width:27%">Control</th><th>Implementation</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Password hashing</strong></td><td>bcrypt at cost 12. Passwords over 72 bytes are rejected rather than silently truncated, so two long passwords cannot collide.</td></tr>
+    <tr><td><strong>Token strategy</strong></td><td>Short-lived access token returned in the response body; refresh token in an httpOnly cookie. The access token is held in memory only — never <code>localStorage</code>, so an XSS payload cannot read it.</td></tr>
+    <tr><td><strong>Token type confusion</strong></td><td>A <code>type</code> claim is compared in constant time, so a refresh token cannot be replayed as an access token.</td></tr>
+    <tr><td><strong>Algorithm downgrade</strong></td><td>The decoder pins HS256; an <code>alg: none</code> token is rejected. Covered by test.</td></tr>
+    <tr><td><strong>Immediate revocation</strong></td><td>Every request re-reads the user and role from the database, so deactivation or demotion takes effect at once rather than at token expiry.</td></tr>
+    <tr><td><strong>Brute-force protection</strong></td><td>Sliding-window limiter keyed on IP <em>and</em> account, so an attacker cannot lock out a legitimate user by spraying their address.</td></tr>
+    <tr><td><strong>Account enumeration</strong></td><td>Identical message and timing for an unknown address and a wrong password — the hash comparison runs either way.</td></tr>
+    <tr><td><strong>Authorisation</strong></td><td>Enforced server-side on every endpoint. The UI mirrors the same matrix as a courtesy, never as the control.</td></tr>
+    <tr><td><strong>SQL injection</strong></td><td>SQLAlchemy ORM throughout; no query text is ever assembled from user input.</td></tr>
+    <tr><td><strong>XSS</strong></td><td>React's default escaping, plus a restrictive Content-Security-Policy and <code>nosniff</code> from the API.</td></tr>
+    <tr><td><strong>CSV formula injection</strong></td><td>Exported cells beginning <code>=</code>, <code>+</code>, <code>-</code> or <code>@</code> are neutralised so a spreadsheet treats them as text.</td></tr>
+    <tr><td><strong>PII masking</strong></td><td>Applied in the Pydantic response schemas. Source fields are excluded from serialisation, so no endpoint can leak them by omission.</td></tr>
+    <tr><td><strong>Audit integrity</strong></td><td>Append-only enforced by PostgreSQL rules, verified against the live database.</td></tr>
+    <tr><td><strong>Secrets in logs</strong></td><td>A redacting filter masks credential patterns, bearer tokens and bcrypt digests before any record is written.</td></tr>
+    <tr><td><strong>Secrets in the audit trail</strong></td><td>Known-sensitive keys are scrubbed before any state snapshot is persisted.</td></tr>
+    <tr><td><strong>Error handling</strong></td><td>Users receive a professional message and a stable code; stack traces and database detail go to the server log only.</td></tr>
+    <tr><td><strong>Secrets in version control</strong></td><td><code>.env</code> gitignored and confirmed absent from the entire commit history before the repository was made public.</td></tr>
+  </tbody>
+</table>
+
+<h3>Data masking examples</h3>
+<table>
+  <thead><tr><th style="width:24%">Field</th><th style="width:30%">Stored</th><th>Returned by the API</th></tr></thead>
+  <tbody>
+    <tr><td>Phone</td><td><code>9924xxxxxx</code></td><td><code>9924******</code></td></tr>
+    <tr><td>Account number</td><td><code>xxxxxxxx2478</code></td><td><code>XXXX XXXX 2478</code></td></tr>
+    <tr><td>Email</td><td><code>krishna.joshi@…</code></td><td><code>k************@e******.…</code></td></tr>
+    <tr><td>Name</td><td><code>Krishna Joshi</code></td><td><code>Krishna J.</code></td></tr>
+    <tr><td>Device fingerprint</td><td><code>DEV-8fa31c9e4b</code></td><td><code>DEV-****1c9e4b</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Role-based access control</h3>
+<table>
+  <thead>
+    <tr><th>Capability</th><th class="c" style="width:12%">Analyst</th><th class="c" style="width:12%">Senior</th><th class="c" style="width:12%">Manager</th><th class="c" style="width:12%">Admin</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>View dashboards, transactions, customers, alerts, cases</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td></tr>
+    <tr><td>Create case, add note, link evidence, export</td><td class="c">●</td><td class="c">●</td><td class="c">●</td><td class="c">●</td></tr>
+    <tr><td>Assign, re-prioritise, escalate, resolve</td><td class="c">—</td><td class="c">●</td><td class="c">●</td><td class="c">●</td></tr>
+    <tr><td>Close and reopen cases, view audit log, run detection</td><td class="c">—</td><td class="c">—</td><td class="c">●</td><td class="c">●</td></tr>
+    <tr><td>Manage users, change roles, train model, import data</td><td class="c">—</td><td class="c">—</td><td class="c">—</td><td class="c">●</td></tr>
+    <tr style="background:#f1f5f9"><td><strong>Total permissions</strong></td><td class="c"><strong>13</strong></td><td class="c"><strong>18</strong></td><td class="c"><strong>23</strong></td><td class="c"><strong>28</strong></td></tr>
+  </tbody>
+</table>
+<p class="caption">
+  Verified against the live deployment: all four roles were signed in and every privileged
+  endpoint was called by each, confirming both the grants and the refusals. Zero violations.
+</p>
+</section>
+
+<!-- ======================= 10. FEATURES ======================= -->
+<section>
+<h2><span class="num">10</span>Application Features</h2>
+<p class="sub">Sixteen routes, every one reading live data.</p>
+
+<table>
+  <thead><tr><th style="width:22%">Module</th><th>Capability</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Login</strong></td><td>Email and password with show/hide, remember-session, inline validation, loading and error states. Demo role hints are populated from non-secret environment configuration.</td></tr>
+    <tr><td><strong>Risk Overview</strong></td><td>Six KPI tiles, transaction volume over 24H/7D/30D/90D, risk distribution donut, suspicious activity trend with a high-risk sub-series, ranked detection reasons, risk by location, and a recent alerts feed.</td></tr>
+    <tr><td><strong>Transaction Monitoring</strong></td><td>Server-side filtering on eleven dimensions, debounced instant search, sortable amount / score / date / customer, 20-50-100 pagination, CSV and Excel export. Filters live in the URL so a view can be shared or bookmarked.</td></tr>
+    <tr><td><strong>Transaction Investigation</strong></td><td>Full summary, a visual risk gauge, the "Why was this flagged?" breakdown rendered from stored factors, the separated ML anomaly score, and the complete behavioural feature set behind the decision.</td></tr>
+    <tr><td><strong>Customer Risk Profile</strong></td><td>Masked identity, aggregate risk position, and a side-by-side contrast of established baseline against the last seven days with percentage deltas, plus amount and risk history charts.</td></tr>
+    <tr><td><strong>Anomaly Detection</strong></td><td>Worklist ranked by score, filterable to model-flagged transactions only, with on-demand re-running of detection across the dataset.</td></tr>
+    <tr><td><strong>Alert Centre</strong></td><td>Polling feed with an unread badge. Each alert can be viewed, investigated, assigned or dismissed, with permission-appropriate actions per role.</td></tr>
+    <tr><td><strong>Investigation Cases</strong></td><td>Full lifecycle — create, assign, re-prioritise, note, link and unlink evidence, escalate, resolve, mark false positive, close and reopen — each writing a timeline event.</td></tr>
+    <tr><td><strong>Investigation Timeline</strong></td><td>Read directly from the <code>case_events</code> table. Never reconstructed in the browser.</td></tr>
+    <tr><td><strong>Analytics</strong></td><td>Volume, average risk trend, high-risk trend, detection reason analysis, value by risk band, payment method breakdown, and false-positive analysis from real case outcomes.</td></tr>
+    <tr><td><strong>Reports</strong></td><td>Risk summary for any period with distribution, leading signals, top locations and the highest-risk transactions, exportable to CSV and Excel.</td></tr>
+    <tr><td><strong>Model Performance</strong></td><td>Version, training provenance, configuration, the full feature dictionary, version history, scenario coverage, and the explicit statement on unavailable metrics.</td></tr>
+    <tr><td><strong>Data Ingestion</strong></td><td>CSV upload with drag-and-drop, per-row validation, and a summary reporting records received, valid, invalid, duplicate, processed and flagged, with each rejected row explained individually.</td></tr>
+    <tr><td><strong>Audit Log</strong></td><td>Searchable, filterable, read-only view of the append-only trail with actor, action, resource, IP and before/after state.</td></tr>
+    <tr><td><strong>User Management</strong></td><td>Create users, change roles, deactivate and reactivate, with guards preventing removal of the last administrator or self-deactivation. Shows the live permission matrix.</td></tr>
+    <tr><td><strong>System Settings</strong></td><td>Effective configuration, risk thresholds, model parameters and security settings, plus self-service password change. No secret is exposed.</td></tr>
+  </tbody>
+</table>
+
+<h3>CSV import validation</h3>
+<p>
+  A file with three bad rows imports the rest and reports exactly which three failed and why,
+  rather than rejecting the upload wholesale or silently skipping rows. Demonstrated on the
+  live system with a deliberately malformed file:
+</p>
+<table>
+  <thead><tr><th class="c" style="width:12%">Row</th><th style="width:22%">Field</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td class="c">4</td><td><code>customer_id</code></td><td>Unknown customer reference CUST-NOPE</td></tr>
+    <tr><td class="c">5</td><td><code>amount</code></td><td>Amount must be greater than zero</td></tr>
+    <tr><td class="c">6</td><td><code>timestamp</code></td><td>Timestamp is not a recognised format</td></tr>
+    <tr><td class="c">7</td><td><code>transaction_id</code></td><td>Duplicate transaction ID within the file</td></tr>
+  </tbody>
+</table>
+<p class="caption">Result: 6 received · 2 valid · 3 invalid · 1 duplicate · 2 processed and scored.</p>
+</section>
+
+<!-- ======================= 11. API ======================= -->
+<section>
+<h2><span class="num">11</span>API Surface</h2>
+<p class="sub">48 operations, documented automatically through OpenAPI.</p>
+
+<p>
+  Every endpoint except <code>/health</code> and <code>/api/auth/login</code> requires
+  authentication. This was verified programmatically: all 45 protected operations were called
+  without a token and every one returned <code>401</code>.
+</p>
+
+<table>
+  <thead><tr><th style="width:26%">Group</th><th>Endpoints</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Authentication</strong></td><td><code>POST /auth/login</code> · <code>POST /auth/refresh</code> · <code>POST /auth/logout</code> · <code>GET /auth/me</code></td></tr>
+    <tr><td><strong>Dashboard</strong></td><td><code>GET /dashboard/summary</code></td></tr>
+    <tr><td><strong>Transactions</strong></td><td><code>GET /transactions</code> · <code>GET /transactions/{ref}</code> · <code>PATCH /transactions/{ref}/status</code> · <code>GET /transactions/export</code> · <code>GET /transactions/locations</code></td></tr>
+    <tr><td><strong>Customers</strong></td><td><code>GET /customers</code> · <code>GET /customers/{ref}</code> · <code>GET /customers/{ref}/risk</code></td></tr>
+    <tr><td><strong>Alerts</strong></td><td><code>GET /alerts</code> · <code>POST /alerts/{ref}/acknowledge</code> · <code>POST /alerts/{ref}/assign</code> · <code>POST /alerts/{ref}/dismiss</code></td></tr>
+    <tr><td><strong>Cases</strong></td><td><code>GET /cases</code> · <code>POST /cases</code> · <code>GET /cases/{ref}</code> · <code>PATCH /cases/{ref}</code> · <code>POST /cases/{ref}/notes</code> · <code>POST /cases/{ref}/transactions</code> · <code>DELETE /cases/{ref}/transactions/{id}</code> · <code>GET /cases/{ref}/timeline</code></td></tr>
+    <tr><td><strong>Analytics &amp; reports</strong></td><td><code>GET /analytics</code> · <code>GET /analytics/outcomes</code> · <code>GET /reports/risk-summary</code> · <code>GET /reports/risk-summary/export</code></td></tr>
+    <tr><td><strong>Detection &amp; model</strong></td><td><code>GET /model/status</code> · <code>POST /model/train</code> · <code>POST /detection/run</code> · <code>GET /anomalies</code></td></tr>
+    <tr><td><strong>Ingestion</strong></td><td><code>POST /transactions/import</code> · <code>GET /imports</code> · <code>GET /imports/{id}</code> · <code>GET /transactions/import/template</code></td></tr>
+    <tr><td><strong>Administration</strong></td><td><code>GET /audit-logs</code> · <code>GET /audit-logs/actions</code> · <code>GET /users</code> · <code>POST /users</code> · <code>PATCH /users/{id}</code> · <code>GET /users/assignable</code> · <code>POST /users/me/password</code> · <code>GET /settings</code> · <code>GET /settings/roles</code></td></tr>
+    <tr><td><strong>Search &amp; system</strong></td><td><code>GET /search</code> · <code>GET /health</code></td></tr>
+  </tbody>
+</table>
+
+<h3>Error contract</h3>
+<p>Every failure returns the same envelope, with a stable machine-readable code and a message safe to show a user:</p>
+<div class="formula" style="text-align:left;font-size:8.4pt">{ "error": { "code": "NOT_FOUND", "message": "The requested record could not be found." } }</div>
+<p>
+  Server-side faults additionally carry a trace identifier so a user report can be correlated
+  with the server log, while the log itself holds the stack trace that the response never
+  exposes.
+</p>
+</section>
+
+<!-- ======================= 12. TESTING ======================= -->
+<section>
+<h2><span class="num">12</span>Testing &amp; Verification</h2>
+<p class="sub">265 tests, all passing.</p>
+
+<div class="stats">
+  <div class="stat"><div class="n">265</div><div class="l">Tests passing</div></div>
+  <div class="stat"><div class="n">205</div><div class="l">Infrastructure-free</div></div>
+  <div class="stat"><div class="n">60</div><div class="l">API &amp; persistence</div></div>
+  <div class="stat"><div class="n">6</div><div class="l">Real bugs caught</div></div>
+</div>
+
+<table>
+  <thead><tr><th style="width:28%">Area</th><th>What is covered</th></tr></thead>
+  <tbody>
+    <tr><td>Risk scoring</td><td>The score/factor invariant including a randomised fuzz, band boundaries, every individual rule, the zero-variance fallback, and the ML contribution cap</td></tr>
+    <tr><td>Feature engineering</td><td>Output shape, the no-lookahead property, cold-start suppression, novelty detection, velocity windows, and customer isolation</td></tr>
+    <tr><td>Machine learning</td><td>Training, scoring, determinism, persistence round-trip, normalisation monotonicity, threshold agreement, and guardrails</td></tr>
+    <tr><td>Security</td><td>Hashing, token forgery, type confusion, <code>alg: none</code> downgrade, rate limiting, masking, log redaction, audit scrubbing</td></tr>
+    <tr><td>Permissions</td><td>The full matrix, plus live RBAC denials for every role against every privileged endpoint</td></tr>
+    <tr><td>Import validation</td><td>Timestamp formats, amount ranges, encoding, missing columns, oversized files</td></tr>
+    <tr><td>API and workflow</td><td>Authentication, session handling, case lifecycle, timeline persistence, audit writes, PII masking in responses</td></tr>
+  </tbody>
+</table>
+
+<h3>Defects the tests caught during development</h3>
+<p>These were found by the suite and by verification against a live database, and all were fixed:</p>
+<table>
+  <thead><tr><th style="width:26%">Defect</th><th>Consequence had it shipped</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Lookahead leak</strong></td><td><code>customer_avg_daily_txns</code> was computed over each customer's entire history including future transactions, so a backfilled score would not have matched the score the transaction received live.</td></tr>
+    <tr><td><strong>Raw PII in responses</strong></td><td>Customer schemas serialised <code>full_name</code>, <code>email</code>, <code>phone</code> and <code>account_number</code> alongside their masked versions, defeating the entire masking layer.</td></tr>
+    <tr><td><strong>Log redaction ordering</strong></td><td>The key/value rule ran before the bearer rule, so <code>Authorization: Bearer &lt;token&gt;</code> masked the word "Bearer" and left the token exposed in logs.</td></tr>
+    <tr><td><strong>Invalid SQL cast</strong></td><td>Casting a boolean to float for conditional counts is rejected by PostgreSQL, returning <code>500</code> on the customer list for every role.</td></tr>
+    <tr><td><strong>Stale ORM relationship</strong></td><td>After assigning a case the identity map returned a cached assignee, so a just-assigned case still displayed as unassigned.</td></tr>
+    <tr><td><strong>Missing timeline event</strong></td><td>Evidence linked while opening a case wrote no <code>TRANSACTION_LINKED</code> event — and that is the primary flow, so those cases showed a timeline with no record of the evidence being attached.</td></tr>
+  </tbody>
+</table>
+
+<h3>Verification against the live deployment</h3>
+<table>
+  <thead><tr><th style="width:40%">Check</th><th>Result</th></tr></thead>
+  <tbody>
+    <tr><td>Login, all four roles</td><td>Correct permission counts of 13 / 18 / 23 / 28</td></tr>
+    <tr><td>Session cookie</td><td><code>HttpOnly; SameSite=None; Secure</code></td></tr>
+    <tr><td>RBAC matrix</td><td>Zero violations, including every expected refusal</td></tr>
+    <tr><td>Explainability</td><td>Factors summed exactly to the score on every high-risk transaction sampled</td></tr>
+    <tr><td>PII masking</td><td>No raw identifier present in any response</td></tr>
+    <tr><td>Audit immutability</td><td><code>UPDATE</code>, <code>DELETE</code> and bare <code>DELETE FROM</code> all discarded</td></tr>
+    <tr><td>SPA deep links</td><td>All routes resolve; no 404 on refresh</td></tr>
+    <tr><td>Production hardening</td><td><code>/docs</code> disabled, all security headers present</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- ======================= 13. DEPLOYMENT ======================= -->
+<section>
+<h2><span class="num">13</span>Deployment</h2>
+<p class="sub">Three managed services, all free-tier.</p>
+
+<table>
+  <thead><tr><th style="width:22%">Component</th><th style="width:22%">Platform</th><th>Configuration</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Database</strong></td><td>Supabase (PostgreSQL 17)</td><td>Mumbai region, session pooler, TLS required. 23 MB of the 500 MB allowance.</td></tr>
+    <tr><td><strong>API</strong></td><td>Render web service</td><td>Singapore region, Python 3.11, deployed from a <code>render.yaml</code> Blueprint.</td></tr>
+    <tr><td><strong>Frontend</strong></td><td>Render static site</td><td>Global CDN, SPA rewrite, immutable caching on hashed assets.</td></tr>
+  </tbody>
+</table>
+
+<h3>Cross-origin considerations</h3>
+<p>
+  The three services sit on different origins, which changes assumptions that held on
+  localhost. The session cookie is issued <code>SameSite=None; Secure</code> so it can travel
+  between the frontend and the API; because credentials are involved, a wildcard CORS origin
+  is not permitted, so the API is given the frontend's exact origin.
+</p>
+
+<h3>Operational notes</h3>
+<ul>
+  <li><strong>Cold starts.</strong> The free API instance sleeps after 15 minutes idle; the next request takes roughly 60 seconds. A scheduled health-check ping removes this entirely.</li>
+  <li><strong>Model artifact.</strong> Render's filesystem is ephemeral, so the trained artifact travels with the repository and the registry stores only a filename, resolved against the artifacts directory wherever it runs.</li>
+  <li><strong>Migrations and seeding.</strong> Run against the managed database from a developer machine, since the free plan provides no remote shell.</li>
+</ul>
+
+<h3>Project metrics</h3>
+<table>
+  <thead><tr><th style="width:40%">Measure</th><th class="n">Value</th></tr></thead>
+  <tbody>
+    <tr><td>Backend application code</td><td class="n">10,073 lines across 66 files</td></tr>
+    <tr><td>Frontend application code</td><td class="n">10,019 lines across 33 files</td></tr>
+    <tr><td>Tests</td><td class="n">2,100 lines across 9 files</td></tr>
+    <tr><td>Scripts and migrations</td><td class="n">1,672 lines</td></tr>
+    <tr><td>Total</td><td class="n">24,061 lines · 141 files</td></tr>
+    <tr><td>API operations</td><td class="n">48</td></tr>
+    <tr><td>Database tables / indexes / foreign keys</td><td class="n">16 / 63 / 25</td></tr>
+    <tr><td>Engineered features (model inputs)</td><td class="n">24 (14)</td></tr>
+    <tr><td>Scoring rules</td><td class="n">8 + 1 bounded ML factor</td></tr>
+    <tr><td>Roles / permissions / audit action types</td><td class="n">4 / 28 / 23</td></tr>
+  </tbody>
+</table>
+
+<h3>Deliberate scope decisions</h3>
+<p>
+  The following were considered and consciously excluded, and are recorded as such in the
+  repository rather than left as apparent oversights:
+</p>
+<ul>
+  <li><strong>Docker and CI.</strong> Three managed free tiers carry the stack; container orchestration would add weight before there is anything to orchestrate.</li>
+  <li><strong>WebSockets.</strong> The alert centre polls on an interval. For an internal console this is far simpler to make correct and survives reconnects, sleeping laptops and proxy timeouts without dedicated reconnect logic.</li>
+  <li><strong>Redis and Celery.</strong> The deployment runs a single API process, so the in-memory rate limiter suffices. Its interface allows a shared store to be substituted without changing callers.</li>
+  <li><strong>PDF report generation.</strong> Reports render on screen and export to CSV and Excel.</li>
+</ul>
+
+<div class="note">
+  <div class="t">Closing note</div>
+  <p>
+    The system's most distinctive property is what it declines to claim. It surfaces
+    transactions for review, shows precisely why, and refuses to present an anomaly as a
+    finding of fraud or to publish accuracy metrics it cannot substantiate. In a domain where
+    a false accusation carries real cost to a real customer, that restraint is the feature.
+  </p>
+</div>
+</section>
+
+</body>
+</html>
